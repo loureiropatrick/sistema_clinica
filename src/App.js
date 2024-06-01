@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 import CadastroPacientes from './pages/CadastroPacientes';
 import AgendamentoConsultas from './pages/AgendamentoConsultas';
 import CalendarioConsultas from './pages/CalendarioConsultas';
@@ -9,6 +10,7 @@ import ConsultaMedica from './pages/ConsultaMedica';
 import HistoricoPaciente from './pages/HistoricoPaciente';
 import CadastroUsuarios from './pages/CadastroUsuarios';
 import ReceitaServicos from './pages/ReceitaServicos';
+import './App.css';
 
 const App = () => {
     return (
@@ -24,9 +26,16 @@ const App = () => {
 };
 
 const Home = () => {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     return (
-        <div className="home">
-            <Sidebar />
+        <div className={`home ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+            <Header />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <div className="content">
                 <Routes>
                     <Route path="cadastro-pacientes" element={<CadastroPacientes />} />
@@ -38,7 +47,17 @@ const Home = () => {
                     <Route path="receita-servicos" element={<ReceitaServicos />} />
                 </Routes>
             </div>
+            <Footer />
         </div>
+    );
+};
+
+const Footer = () => {
+    return (
+        <footer>
+            <p>© Copyright MedCenter. All Rights Reserved</p>
+            <p>Designed by MedCenter</p>
+        </footer>
     );
 };
 
