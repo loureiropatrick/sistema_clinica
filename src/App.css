@@ -1,0 +1,213 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header h1 {
+  margin: 0;
+}
+
+.header .user-info {
+  display: flex;
+  align-items: center;
+}
+
+.header .user-info img {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.header .user-info span {
+  font-size: 18px;
+}
+
+.home {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  flex: 1;
+}
+
+.sidebar {
+  width: 40px !important; /* Largura quando fechada */
+  background-color: #6d8eaf !important; /* Verde escuro */
+  color: #fff;
+  padding: 20px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.sidebar.open {
+  width: 250px !important; /* Largura quando aberta */
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.sidebar ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.sidebar ul li a:hover {
+  text-decoration: underline;
+}
+
+.sidebar-icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.sidebar-toggle-button {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: auto;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.sidebar-open .content {
+  margin-left: 250px; /* Largura quando sidebar está aberta */
+}
+
+footer {
+  background-color: #007bff;
+  color: #fff;
+  text-align: center;
+  padding: 10px 20px;
+  margin-top: auto;
+}
+
+button {
+  background-color: #16a086; /* Cor de fundo dos botões */
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 20px; /* Faz os botões arredondados */
+}
+
+button:hover {
+  background-color: #005a4e; /* Cor de fundo quando hover */
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.login-container input {
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 16px;
+  width: 300px;
+  border-radius: 20px; /* Faz as caixas de entrada arredondadas */
+}
+
+.login-container button {
+  width: 300px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.login-buttons-container {
+  display: flex;
+  justify-content: space-between; /* Os botões estarão espaçados igualmente */
+  width: 300px; /* Ajuste a largura conforme necessário */
+}
+
+@media (max-width: 768px) {
+  .content {
+    margin-left: 0;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header .user-info {
+    margin-top: 10px;
+  }
+
+  .sidebar {
+    width: 50px;
+  }
+
+  .sidebar.open {
+    width: 200px;
+  }
+}
+.forgot-password {
+  color: #aaa; /* Cor cinza claro */
+  font-size: 14px; /* Tamanho menor */
+  text-align: right; /* Alinhado à direita */
+  cursor: pointer; /* Transforma o cursor em uma mãozinha ao passar sobre o link */
+}
+
+.forgot-password:hover {
+  text-decoration: underline; /* Sublinha o texto ao passar sobre o link */
+}
+.error-input {
+  border: 2px solid red; /* Agora, é uma borda sólida de 2px em todos os lados */
+  border-radius: 5px; /* Adiciona um leve arredondamento nas bordas */
+}
+.error-message {
+  color: #ff5050; /* Define um tom muito claro de vermelho */
+  text-decoration: underline; /* Sublinha o texto */
+  font-size: 0.8em; /* Define o tamanho da fonte como 80% do tamanho padrão */
+}
+
+
+
+
