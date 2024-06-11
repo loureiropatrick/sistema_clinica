@@ -13,6 +13,15 @@
 
 }
 
+.valid {
+    color: green;
+  }
+  
+  .invalid {
+    color: red;
+  }
+
+
 .container {
     width: 100%;
     max-width: 800px;
