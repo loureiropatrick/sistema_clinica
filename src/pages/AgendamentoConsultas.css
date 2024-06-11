@@ -1,3 +1,18 @@
+.title {
+    text-align: center;
+
+
+
+}
+
+.idPaciente{
+    text-align: center;
+    margin-bottom: 50px;
+
+
+
+}
+
 .container {
     width: 100%;
     max-width: 800px;
@@ -62,14 +77,10 @@
 }
 
 .btn {
-    padding: 10px 20px;
+    width: 10px;
+    height: 10px;
     background: #16a086;
     color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-    text-align: center;
 }
 
 .btn:hover {
@@ -103,7 +114,7 @@
     gap: 20px;
 }
 
-.pacienteResult {
+.form-body-container {
     border: 1.5px dashed #aaa;
     padding: 20px;
     border-radius: 5px;
