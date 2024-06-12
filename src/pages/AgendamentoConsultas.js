@@ -95,7 +95,7 @@ const AgendamentoConsultas = () => {
         };
 
         try {
-            await addDoc(collection(db, 'consultas'), consulta);
+            await addDoc(collection(db, 'consultasAgendadas'), consulta);
             alert('Consulta agendada com sucesso!');
             // Limpar os campos do formulário
             setCpfconsulta('');
@@ -195,8 +195,8 @@ const AgendamentoConsultas = () => {
                         <InputMask
                             type="text"
                             name="cpfConsulta"
-                            value={userData ? userData.cpf : cpfConsulta}
-                            onChange={(e) => setCpfconsulta(e.target.value)}
+                            value={cpfConsulta}
+                            onChange={(e) => setCpfconsulta(userData.cpf)}
                             mask="999.999.999-99"
                             required
                         />
@@ -206,18 +206,18 @@ const AgendamentoConsultas = () => {
                         <input
                             type="text"
                             name="nome"
-                            value={userData ? userData.nome : nome}
-                            onChange={(e) => setNome(e.target.value)}
+                            value={nome}
+                            onChange={(e) => setNome(userData.nome)}
                             required
                         />
                     </div>
                     <div className="form-group">
-                        <label>Contato</label>
+                        <label>Telefone</label>
                         <input
                             type="text"
                             name="Contato"
-                            value={userData ? userData.celular : telefone}
-                            onChange={(e) => setTelefone(e.target.value)}
+                            value={telefone}
+                            onChange={(e) => setTelefone(userData.celular)}
                             required
                         />
                     </div>
