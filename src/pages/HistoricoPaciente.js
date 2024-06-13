@@ -1,11 +1,14 @@
+// src/pages/HistoricoPaciente.js
 import React, { useState } from 'react';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import './HistoricoPaciente.css';
+import InputMask from 'react-input-mask';
 
 const HistoricoPaciente = () => {
   const [cpf, setCpf] = useState('');
   const [dados, setDados] = useState([]);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
 
   const handleChange = (e) => {
     setCpf(e.target.value);
@@ -18,26 +21,47 @@ const HistoricoPaciente = () => {
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => doc.data());
       setDados(docs);
-      if(docs.length === 0) {
-        alert("Nenhum histórico encontrado para o CPF fornecido.");
+      if (docs.length === 0) {
+        setFeedbackMessage({ type: 'error', text: "Nenhum histórico encontrado para o CPF fornecido." });
+      } else {
+        setFeedbackMessage({ type: 'success', text: "Histórico encontrado com sucesso." });
       }
     } catch (error) {
       console.error("Erro ao buscar histórico: ", error);
-      alert("Erro ao buscar histórico");
+      setFeedbackMessage({ type: 'error', text: "Erro ao buscar histórico" });
     }
   };
 
   return (
-    <div className="historico-paciente-container">
+    <div className="container">
       <form className="historico-paciente-form" onSubmit={handleSubmit}>
-        <h2>Histórico do Paciente</h2>
-        <input type="text" name="cpf" placeholder="Digite o CPF" value={cpf} onChange={handleChange} required />
-        <button type="submit">Buscar Histórico</button>
+        <h2 className="form-header">Histórico do Paciente</h2>
+        <div className="form-body">
+          <div className="form-group full-width">
+            <label>CPF</label>
+            <InputMask 
+              mask="999.999.999-99" 
+              name="cpf" 
+              placeholder="Digite o CPF" 
+              value={cpf} 
+              onChange={handleChange} 
+              required 
+            />
+          </div>
+          <div className="btn-container">
+            <button type="submit" className="btn">Buscar Histórico</button>
+          </div>
+        </div>
       </form>
+      {feedbackMessage && (
+        <div className={`feedback-message ${feedbackMessage.type}`}>
+          {feedbackMessage.text}
+        </div>
+      )}
       <div className="historico-paciente-dados">
         {dados.length > 0 ? (
           dados.map((dado, index) => (
-            <div key={index} className="historico-item">
+            <div key={index} className="historico-item form-body-container">
               <p><strong>Nome:</strong> {dado.nome}</p>
               <p><strong>CPF:</strong> {dado.cpf}</p>
               <p><strong>Data de Nascimento:</strong> {dado.dataNascimento}</p>
@@ -63,3 +87,5 @@ const HistoricoPaciente = () => {
 };
 
 export default HistoricoPaciente;
+
+
