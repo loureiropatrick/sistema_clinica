@@ -1,42 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import './CalendarioConsultas.css'; // Importe o arquivo CSS
 
 const CalendarioConsultas = () => {
-    const [data, setData] = useState(''); // Método que define o valor da data escolhida pelo usuário.
+    const [data, setData] = useState('');
     const [consultas, setConsultas] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [confirmacaoSelecionada, setConfirmacaoSelecionada] = useState('');
 
-    // Função para formatar a data de yyyy-mm-dd para dd/mm/yyyy
-    const formatarData = (data) => {
-    const [ano, mes, dia] = data.split('-');
-    return `${dia}/${mes}/${ano}`;
-    };
-
-
-    // Função para buscar consultas do Firebase
     const fetchConsultas = async () => {
         const consultasCollection = collection(db, "consultasAgendadas");
         const querySnapshot = await getDocs(consultasCollection);
-        const consultasList = querySnapshot.docs.map(doc => doc.data());
+        const consultasList = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
         setConsultas(consultasList);
     };
 
     useEffect(() => {
         fetchConsultas();
-    }, [data]); // Refazer a consulta, toda vez que o campo data inserido pelo usuário for modificado.
+    }, [data]);
 
-    // Calcule as consultas a serem exibidas na página atual
+    const formatarData = (data) => {
+        const [ano, mes, dia] = data.split('-');
+        return `${dia}/${mes}/${ano}`;
+    };
+
+    const handleDeleteConsulta = async (id) => {
+        // Perguntar ao usuário se ele tem certeza
+        const confirmDelete = window.confirm("Tem certeza que deseja deletar esta consulta?");
+        
+        if (confirmDelete) {
+            try {
+                await deleteDoc(doc(db, "consultasAgendadas", id));
+                fetchConsultas(); // Atualiza a lista de consultas após a exclusão
+            } catch (error) {
+                console.error("Erro ao deletar consulta:", error);
+            }
+        }
+    };
+
+    const updateConfirmacao = async (id, confirmada) => {
+        try {
+            const consultaRef = doc(db, "consultasAgendadas", id);
+            await updateDoc(consultaRef, {
+                confirmacao: confirmada
+            });
+            fetchConsultas(); // Atualiza a lista de consultas após a atualização
+        } catch (error) {
+            console.error("Erro ao atualizar confirmação:", error);
+        }
+    };
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = consultas.slice(indexOfFirstItem, indexOfLastItem);
-
-    // Determine o número de páginas
     const totalPages = Math.ceil(consultas.length / itemsPerPage);
 
-    // Handlers para navegação de página
     const handlePreviousPage = () => {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
@@ -76,6 +99,7 @@ const CalendarioConsultas = () => {
                             <th>Data</th>
                             <th>Hora</th>
                             <th>Nome</th>
+                            <th>CPF</th>
                             <th>Telefone</th>
                             <th>Motivo</th>
                             <th>Forma de Pagamento</th>
@@ -90,12 +114,28 @@ const CalendarioConsultas = () => {
                                 <td>{formatarData(consulta.data)}</td>
                                 <td>{consulta.hora}</td>
                                 <td>{consulta.nome}</td>
+                                <td>{consulta.cpfConsulta}</td>
                                 <td>{consulta.telefone}</td>
                                 <td>{consulta.motivo}</td>
                                 <td>{consulta.formaPagamento}</td>
-                                <td><button>Confirmar</button></td>
+                                <td>
+                                    <select
+                                        name="Confirmação"
+                                        value={consulta.confirmação}
+                                        onChange={(e) => {
+                                            setConfirmacaoSelecionada(e.target.value);
+                                            if (e.target.value === "True") {
+                                                updateConfirmacao(consulta.id, true); // Aqui estava 'consulta.confirmação' corrigi para 'consulta.id'
+                                            }
+                                        }}
+                                        required
+                                    >
+                                        <option value="True">Confirmada</option>
+                                        <option value="False">Não Confirmada</option>
+                                    </select>
+                                </td>
                                 <td><button>Alterar</button></td>
-                                <td><button>Deletar</button></td>
+                                <td><button onClick={() => handleDeleteConsulta(consulta.id)}>Deletar</button></td>
                             </tr>
                         ))}
                     </tbody>

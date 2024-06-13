@@ -111,7 +111,7 @@ const AgendamentoConsultas = () => {
           hora,
           motivo,
           formaPagamento,
-          confirmação: false, // Campo "confirmação" adicionado com valor inicial "false"
+          confirmacao: false, // Campo "confirmação" adicionado com valor inicial "false"
           preço: null, // Campo "preço" adicionado com valor inicial "null"
         };
 
