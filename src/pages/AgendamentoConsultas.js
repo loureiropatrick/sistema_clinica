@@ -289,7 +289,7 @@ const AgendamentoConsultas = () => {
                         </select>
                     </div>
 
-                    <button type="submit" style = {{ marginTop: '50px', width: '80vw', textAlign: 'center'}}>Confirmar</button>
+                    <button type="submit" style = {{ marginTop: '50px', width: '50vw', textAlign: 'center'}}>Confirmar</button>
 
                 </form>
 
