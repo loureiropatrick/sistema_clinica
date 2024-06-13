@@ -1,14 +1,53 @@
-import React, { useEffect, useState } from 'react'; // Manipulação de estados lógicos
-import { Formik, Form, Field, ErrorMessage } from 'formik'; // Formulários
-import { db } from '../firebaseConfig'; // Firebase Sync
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";  // Firebase CRUD
-import InputMask from 'react-input-mask';
-import firebase from '../firebaseConfig';
+import React, { useEffect, useState } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, getDocs } from "firebase/firestore";
 import './CalendarioConsultas.css'; // Importe o arquivo CSS
 
 const CalendarioConsultas = () => {
-
     const [data, setData] = useState(''); // Método que define o valor da data escolhida pelo usuário.
+    const [consultas, setConsultas] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    // Função para formatar a data de yyyy-mm-dd para dd/mm/yyyy
+    const formatarData = (data) => {
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+    };
+
+
+    // Função para buscar consultas do Firebase
+    const fetchConsultas = async () => {
+        const consultasCollection = collection(db, "consultasAgendadas");
+        const querySnapshot = await getDocs(consultasCollection);
+        const consultasList = querySnapshot.docs.map(doc => doc.data());
+        setConsultas(consultasList);
+    };
+
+    useEffect(() => {
+        fetchConsultas();
+    }, [data]); // Refazer a consulta, toda vez que o campo data inserido pelo usuário for modificado.
+
+    // Calcule as consultas a serem exibidas na página atual
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = consultas.slice(indexOfFirstItem, indexOfLastItem);
+
+    // Determine o número de páginas
+    const totalPages = Math.ceil(consultas.length / itemsPerPage);
+
+    // Handlers para navegação de página
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
 
     return (
         <div className="main">
@@ -36,6 +75,8 @@ const CalendarioConsultas = () => {
                         <tr>
                             <th>Data</th>
                             <th>Hora</th>
+                            <th>Nome</th>
+                            <th>Telefone</th>
                             <th>Motivo</th>
                             <th>Forma de Pagamento</th>
                             <th>Confirmar</th>
@@ -44,9 +85,26 @@ const CalendarioConsultas = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* Adicione aqui as linhas das consultas */}
+                        {currentItems.map((consulta, index) => (
+                            <tr key={index}>
+                                <td>{formatarData(consulta.data)}</td>
+                                <td>{consulta.hora}</td>
+                                <td>{consulta.nome}</td>
+                                <td>{consulta.telefone}</td>
+                                <td>{consulta.motivo}</td>
+                                <td>{consulta.formaPagamento}</td>
+                                <td><button>Confirmar</button></td>
+                                <td><button>Alterar</button></td>
+                                <td><button>Deletar</button></td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
+                <div className="pagination">
+                    <button onClick={handlePreviousPage} disabled={currentPage === 1}>Anterior</button>
+                    <span>{currentPage} de {totalPages}</span>
+                    <button onClick={handleNextPage} disabled={currentPage === totalPages}>Próxima</button>
+                </div>
             </div>
         </div>
     );
