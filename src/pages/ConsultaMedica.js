@@ -23,11 +23,26 @@ const ConsultaMedica = () => {
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+  
+    if (name === 'nome') {
+      if (typeof value === 'string') {
+        setFormData({ ...formData, [name]: value });
+      }
+    } else if (name === 'cpf') {
+      if (/^\d{11}$/.test(value)) {
+        setFormData({ ...formData, [name]: value });
+      }
+    } else if (name === 'altura' || name === 'peso') {
+      const floatValue = parseFloat(value);
+      if (!isNaN(floatValue)) {
+        setFormData({ ...formData, [name]: floatValue });
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

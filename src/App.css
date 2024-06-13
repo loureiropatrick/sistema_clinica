@@ -1,5 +1,5 @@
+/* App.css */
 body {
-  font-family: Arial, sans-serif;
   background-color: #f0f2f5;
   margin: 0;
   padding: 0;
@@ -15,7 +15,7 @@ body {
 }
 
 .header {
-  background-color: #007bff;
+  background-color: #16a086;
   color: #fff;
   padding: 10px 20px;
   display: flex;
@@ -44,18 +44,17 @@ body {
 }
 
 .home {
-  margin-left: 80px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   min-height: 100vh;
   flex: 1;
 }
 
 .sidebar {
-  width: 40px !important; /* Largura quando fechada */
-  background-color: #6d8eaf !important; /* Verde escuro */
+  width: 50px; /* Largura quando fechada */
+  background-color: #16a086; /* Verde escuro */
   color: #fff;
-  padding: 20px 0;
+  padding: 10px 0;
   position: fixed;
   top: 0;
   left: 0;
@@ -66,7 +65,7 @@ body {
 }
 
 .sidebar.open {
-  width: 250px !important; /* Largura quando aberta */
+  width: 250px; /* Largura quando aberta */
 }
 
 .sidebar ul {
@@ -88,6 +87,7 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
+  
 }
 
 .sidebar ul li a:hover {
@@ -99,36 +99,60 @@ body {
   font-size: 20px;
 }
 
+.sidebar-menu-icon {
+  font-size: 20px;
+  color: #fff;
+}
+
+
 .sidebar-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: transparent;
   border: none;
-  padding: 0;
+  padding: 10px;
   cursor: pointer;
 }
 
-.sidebar-logo {
-  width: 40px;
+
+.header-logo {
+  width: 100px; /* Ajuste o tamanho conforme necessário */
   height: auto;
-  margin-bottom: 20px;
-  cursor: pointer;
+  margin-right: 20px; /* Adicione um espaçamento entre a logo e as informações do usuário */
 }
 
+.sidebar-divider {
+  border: 0;
+  height: 1px;
+  background: #ccc;
+  margin: 10px 0;
+}
 
+.content {
+  margin-left: 50px; /* Largura quando sidebar está fechada */
+  transition: margin-left 0.3s ease;
+  padding: 0px;
+  flex: 1;
+}
 
-.sidebar-open .content {
+.sidebar.open ~ .content {
   margin-left: 250px; /* Largura quando sidebar está aberta */
 }
 
 footer {
-  background-color: #007bff;
+  position: relative;
+  margin-top:50%;
+  width: 100%;
+  background-color: #16a086;
   color: #fff;
   text-align: center;
   padding: 10px 20px;
-  margin-top: auto;
 }
 
+
 button {
-  background-color: #007bff;
+  background-color: #16a086;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -136,7 +160,7 @@ button {
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #009277;
 }
 
 .login-container {
@@ -163,23 +187,23 @@ button:hover {
 
 @media (max-width: 768px) {
   .content {
-      margin-left: 0;
+    margin-left: 0;
   }
 
   .header {
-      flex-direction: column;
-      align-items: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .header .user-info {
-      margin-top: 10px;
+    margin-top: 10px;
   }
 
   .sidebar {
-      width: 50px;
+    width: 50px;
   }
 
   .sidebar.open {
-      width: 200px;
+    width: 200px;
   }
 }
