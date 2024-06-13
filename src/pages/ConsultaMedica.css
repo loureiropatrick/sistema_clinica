@@ -1,0 +1,45 @@
+/* src/pages/ConsultaMedica.css */
+.consulta-medica-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+  }
+  
+  .consulta-medica-form {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .consulta-medica-form h2 {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .consulta-medica-form input,
+  .consulta-medica-form select,
+  .consulta-medica-form textarea,
+  .consulta-medica-form button {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .consulta-medica-form button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .consulta-medica-form button:hover {
+    background-color: #0056b3;
+  }
+  

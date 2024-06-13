@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
 import Sidebar from './components/Sidebar';
@@ -26,16 +26,10 @@ const App = () => {
 };
 
 const Home = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
-
     return (
-        <div className={`home ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        <div className="home">
             <Header />
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <Sidebar />
             <div className="content">
                 <Routes>
                     <Route path="cadastro-pacientes" element={<CadastroPacientes />} />
