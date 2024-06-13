@@ -8,6 +8,15 @@ const CalendarioConsultas = () => {
     const [consultas, setConsultas] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [modalAberto, setModalAberto] = useState(false); // Estado para controlar se o modal de edição está aberto
+    const [consultaSelecionada, setConsultaSelecionada] = useState(null); // Estado para armazenar os dados da consulta selecionada para edição
+    const [formEdicao, setFormEdicao] = useState({
+        data: '',
+        hora: '',
+        motivo: '',
+        formaPagamento: ''
+    });
+    const [mensagemSucesso, setMensagemSucesso] = useState('');
 
     // Função para buscar as consultas agendadas
     const fetchConsultas = async () => {
@@ -62,16 +71,85 @@ const CalendarioConsultas = () => {
         }
     };
 
-    const updateConfirmacao = async (id, confirmada) => {
+    const handleUpdateConfirmacao = async (id, confirmada) => {
         try {
             const consultaRef = doc(db, "consultasAgendadas", id);
             await updateDoc(consultaRef, {
                 confirmacao: confirmada
             });
             fetchConsultas(); // Atualiza a lista de consultas após a atualização
+            setMensagemSucesso('Alteração concluída com sucesso!'); // Define a mensagem de sucesso
+            setTimeout(() => {
+                setMensagemSucesso(''); // Limpa a mensagem após 3 segundos
+            }, 3000); // 3000 milissegundos = 3 segundos
         } catch (error) {
             console.error("Erro ao atualizar confirmação:", error);
         }
+    };
+
+    const handleAlterarConsulta = (consulta) => {
+        // Configura a consulta selecionada para edição e abre o modal
+        setConsultaSelecionada(consulta);
+        setFormEdicao({
+            data: consulta.data,
+            hora: consulta.hora,
+            motivo: consulta.motivo,
+            formaPagamento: consulta.formaPagamento
+        });
+        setModalAberto(true);
+    };
+
+    const handleSalvarAlteracoes = async () => {
+        const confirmacao = window.confirm("Tem certeza que deseja salvar as alterações?");
+        
+        if (confirmacao) {
+            try {
+                const hoje = new Date(); // Obtemos a data atual
+                const dataEdicao = new Date(formEdicao.data); // Convertemos a data de edição para um objeto Date
+                
+                // Verifica se a data de edição é maior ou igual à data atual
+                if (dataEdicao < hoje) {
+                    alert("Por favor, selecione uma data válida, posterior ao dia de hoje.");
+                    return; // Retorna sem continuar se a validação falhar
+                }
+                
+                const consultaRef = doc(db, "consultasAgendadas", consultaSelecionada.id);
+                await updateDoc(consultaRef, {
+                    data: formEdicao.data,
+                    hora: formEdicao.hora,
+                    motivo: formEdicao.motivo,
+                    formaPagamento: formEdicao.formaPagamento
+                });
+                fetchConsultas();
+                setModalAberto(false);
+                setConsultaSelecionada(null);
+                setFormEdicao({
+                    data: '',
+                    hora: '',
+                    motivo: '',
+                    formaPagamento: ''
+                });
+                setMensagemSucesso('Alteração concluída com sucesso!');
+                setTimeout(() => {
+                    setMensagemSucesso('');
+                }, 3000);
+            } catch (error) {
+                console.error("Erro ao atualizar consulta:", error);
+            }
+        }
+    };
+    
+
+    const handleCancelarEdicao = () => {
+        // Fecha o modal sem salvar as alterações
+        setModalAberto(false);
+        setConsultaSelecionada(null);
+        setFormEdicao({
+            data: '',
+            hora: '',
+            motivo: '',
+            formaPagamento: ''
+        });
     };
 
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -144,7 +222,7 @@ const CalendarioConsultas = () => {
                                             value={consulta.confirmacao ? "True" : "False"} // Definindo o valor do select conforme o campo 'confirmacao' da consulta
                                             onChange={(e) => {
                                                 const confirmada = e.target.value === "True";
-                                                updateConfirmacao(consulta.id, confirmada);
+                                                handleUpdateConfirmacao(consulta.id, confirmada); // Corrigido para chamar a função correta
                                             }}
                                             required
                                         >
@@ -152,7 +230,7 @@ const CalendarioConsultas = () => {
                                             <option value="False">Não Confirmada</option>
                                         </select>
                                     </td>
-                                    <td><button>Alterar</button></td>
+                                    <td><button onClick={() => handleAlterarConsulta(consulta)}>Alterar</button></td>
                                     <td><button onClick={() => handleDeleteConsulta(consulta.id)}>Deletar</button></td>
                                 </tr>
                             ))
@@ -169,6 +247,65 @@ const CalendarioConsultas = () => {
                     <button onClick={handleNextPage} disabled={currentPage === totalPages}>Próxima</button>
                 </div>
             </div>
+
+            {/* Modal para edição */}
+            {modalAberto && consultaSelecionada && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h2>Editar Consulta</h2>
+                        <div>
+                            <label>Data:</label>
+                            <input
+                                type="date"
+                                value={formEdicao.data}
+                                onChange={(e) => setFormEdicao({ ...formEdicao, data: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label>Hora:</label>
+                            <input
+                                type="time"
+                                value={formEdicao.hora}
+                                onChange={(e) => setFormEdicao({ ...formEdicao, hora: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label>Motivo:</label>
+                            <input
+                                type="text"
+                                value={formEdicao.motivo}
+                                onChange={(e) => setFormEdicao({ ...formEdicao, motivo: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label>Forma de Pagamento:</label>
+                            <select
+                                name="formaPagamento"
+                                value={formEdicao.formaPagamento}
+                                onChange={(e) => setFormEdicao({ ...formEdicao, formaPagamento: e.target.value })}
+                            >
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="PIX">PIX</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Plano de Saúde">Plano de Saúde</option>
+                                <option value="Convênio">Convênio</option>
+                            </select>
+                        </div>
+                        <div className="modal-buttons">
+                            <button onClick={handleSalvarAlteracoes}>Salvar</button>
+                            <button onClick={handleCancelarEdicao}>Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mensagem de sucesso */}
+            {mensagemSucesso && (
+                <div className="mensagem-sucesso">
+                    <p>{mensagemSucesso}</p>
+                </div>
+            )}
         </div>
     );
 };
