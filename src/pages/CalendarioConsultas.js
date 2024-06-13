@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc, query, where } from "firebase/firestore";
 import './CalendarioConsultas.css'; // Importe o arquivo CSS
 
 const CalendarioConsultas = () => {
@@ -8,16 +8,35 @@ const CalendarioConsultas = () => {
     const [consultas, setConsultas] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
-    const [confirmacaoSelecionada, setConfirmacaoSelecionada] = useState('');
 
+    // Função para buscar as consultas agendadas
     const fetchConsultas = async () => {
-        const consultasCollection = collection(db, "consultasAgendadas");
-        const querySnapshot = await getDocs(consultasCollection);
-        const consultasList = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-        setConsultas(consultasList);
+        try {
+            const consultasCollection = collection(db, "consultasAgendadas");
+            let consultasQuery = consultasCollection;
+
+            // Se houver uma data selecionada, aplica o filtro
+            if (data) {
+                consultasQuery = query(consultasCollection, where("data", "==", data));
+            }
+
+            const querySnapshot = await getDocs(consultasQuery);
+            let consultasList = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            // Ordenar consultas por data e hora (do mais próximo para o mais distante)
+            consultasList.sort((consulta1, consulta2) => {
+                const dataHora1 = `${consulta1.data} ${consulta1.hora}`;
+                const dataHora2 = `${consulta2.data} ${consulta2.hora}`;
+                return dataHora1.localeCompare(dataHora2);
+            });
+
+            setConsultas(consultasList);
+        } catch (error) {
+            console.error("Erro ao buscar consultas:", error);
+        }
     };
 
     useEffect(() => {
@@ -109,35 +128,39 @@ const CalendarioConsultas = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {currentItems.map((consulta, index) => (
-                            <tr key={index}>
-                                <td>{formatarData(consulta.data)}</td>
-                                <td>{consulta.hora}</td>
-                                <td>{consulta.nome}</td>
-                                <td>{consulta.cpfConsulta}</td>
-                                <td>{consulta.telefone}</td>
-                                <td>{consulta.motivo}</td>
-                                <td>{consulta.formaPagamento}</td>
-                                <td>
-                                    <select
-                                        name="Confirmação"
-                                        value={consulta.confirmação}
-                                        onChange={(e) => {
-                                            setConfirmacaoSelecionada(e.target.value);
-                                            if (e.target.value === "True") {
-                                                updateConfirmacao(consulta.id, true); // Aqui estava 'consulta.confirmação' corrigi para 'consulta.id'
-                                            }
-                                        }}
-                                        required
-                                    >
-                                        <option value="True">Confirmada</option>
-                                        <option value="False">Não Confirmada</option>
-                                    </select>
-                                </td>
-                                <td><button>Alterar</button></td>
-                                <td><button onClick={() => handleDeleteConsulta(consulta.id)}>Deletar</button></td>
+                        {currentItems.length > 0 ? (
+                            currentItems.map((consulta, index) => (
+                                <tr key={index}>
+                                    <td>{formatarData(consulta.data)}</td>
+                                    <td>{consulta.hora}</td>
+                                    <td>{consulta.nome}</td>
+                                    <td>{consulta.cpfConsulta}</td>
+                                    <td>{consulta.telefone}</td>
+                                    <td>{consulta.motivo}</td>
+                                    <td>{consulta.formaPagamento}</td>
+                                    <td>
+                                        <select
+                                            name="Confirmação"
+                                            value={consulta.confirmacao ? "True" : "False"} // Definindo o valor do select conforme o campo 'confirmacao' da consulta
+                                            onChange={(e) => {
+                                                const confirmada = e.target.value === "True";
+                                                updateConfirmacao(consulta.id, confirmada);
+                                            }}
+                                            required
+                                        >
+                                            <option value="True">Confirmada</option>
+                                            <option value="False">Não Confirmada</option>
+                                        </select>
+                                    </td>
+                                    <td><button>Alterar</button></td>
+                                    <td><button onClick={() => handleDeleteConsulta(consulta.id)}>Deletar</button></td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="10">Nenhuma consulta encontrada para esta data.</td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
                 <div className="pagination">
