@@ -52,7 +52,7 @@ body {
 
 .sidebar {
   width: 40px !important; /* Largura quando fechada */
-  background-color: #6d8eaf !important; /* Verde escuro */
+  background-color: #fff !important; /* Verde escuro */
   color: #fff;
   padding: 20px 0;
   position: fixed;
@@ -81,7 +81,7 @@ body {
 }
 
 .sidebar ul li a {
-  color: #fff;
+  color: #aaa;
   text-decoration: none;
   font-size: 18px;
   display: flex;

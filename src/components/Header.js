@@ -1,11 +1,12 @@
 import React from 'react';
-import '../App.css';
+import { FaBars } from 'react-icons/fa';
+import './Header.css';
 import userPlaceholder from '../assets/user-placeholder.png';
 
-const Header = () => {
+const Header = ({ toggleSidebar }) => {
     return (
         <header className="header">
-            <h1>Nome da Clínica</h1>
+            <FaBars className="menu-icon" onClick={toggleSidebar} />
             <div className="user-info">
                 <img src={userPlaceholder} alt="Usuário" />
                 <span>Dr. Nome do Médico</span>
@@ -15,3 +16,5 @@ const Header = () => {
 };
 
 export default Header;
+
+

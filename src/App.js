@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
-import SignUp from './components/signUp'; // Corrigir o nome do componente SignUp
+import SignUp from './components/signUp';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import CadastroPacientes from './pages/CadastroPacientes';
@@ -14,54 +14,61 @@ import ReceitaServicos from './pages/ReceitaServicos';
 import './App.css';
 
 const App = () => {
-    return (
-        <Router>
-            <div className="App">
-                <Routes>
-                    <Route path="/" element={<Login />} />
-                    <Route path="/signup" element={<SignUp />} /> {/* Corrigir o nome do componente SignUp */}
-                    <Route path="/home/*" element={<Home />} />
-                </Routes>
-            </div>
-        </Router>
-    );
-};
-
-const Home = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    const handleLogin = () => {
+        setIsAuthenticated(true);
+    };
+
     return (
-        <div className={`home ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-            <Header />
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <div className="content">
-                <Routes>
-                    <Route path="cadastro-pacientes" element={<CadastroPacientes />} />
-                    <Route path="agendamento-consultas" element={<AgendamentoConsultas />} />
-                    <Route path="calendario-consultas" element={<CalendarioConsultas />} />
-                    <Route path="consulta-medica" element={<ConsultaMedica />} />
-                    <Route path="historico-paciente" element={<HistoricoPaciente />} />
-                    <Route path="cadastro-usuarios" element={<CadastroUsuarios />} />
-                    <Route path="receita-servicos" element={<ReceitaServicos />} />
-                </Routes>
+        <Router>
+            <div className="App">
+                {isAuthenticated ? (
+                    <>
+                        <Header toggleSidebar={toggleSidebar} />
+                        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+                        <div className="content">
+                            <Routes>
+                                <Route path="/" element={<CadastroPacientes />} />
+                                <Route path="/signup" element={<SignUp />} />
+                                <Route path="/home/*" element={<Home />} />
+                            </Routes>
+                        </div>
+                    </>
+                ) : (
+                    <Routes>
+                        <Route path="/" element={<Login onLogin={handleLogin} />} />
+                        <Route path="/signup" element={<SignUp />} />
+                    </Routes>
+                )}
             </div>
-            <Footer />
+        </Router>
+    );
+};
+
+const Home = () => {
+    return (
+        <div className="home">
+            <Routes>
+                <Route path="cadastro-pacientes" element={<CadastroPacientes />} />
+                <Route path="agendamento-consultas" element={<AgendamentoConsultas />} />
+                <Route path="calendario-consultas" element={<CalendarioConsultas />} />
+                <Route path="consulta-medica" element={<ConsultaMedica />} />
+                <Route path="historico-paciente" element={<HistoricoPaciente />} />
+                <Route path="cadastro-usuarios" element={<CadastroUsuarios />} />
+                <Route path="receita-servicos" element={<ReceitaServicos />} />
+            </Routes>
         </div>
     );
 };
 
-const Footer = () => {
-    return (
-        <footer>
-            <p>© Copyright +Saúde. All Rights Reserved</p>
-            <p>Designed by +Saúde</p>
-        </footer>
-    );
-};
-
 export default App;
+
+
+
 
