@@ -150,7 +150,7 @@ const AgendamentoConsultas = () => {
                         required
                     />
                 </form>
-                <p className={result === 'CPF válido!' ? 'valid' : 'invalid'}>{result}</p>
+                {/*<p className={result === 'CPF válido!' ? 'valid' : 'invalid'}>{result}</p> -- Desativado para não confundir o cliente */}
             </div>
 
             {userData && (
