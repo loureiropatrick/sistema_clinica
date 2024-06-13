@@ -84,6 +84,25 @@ const AgendamentoConsultas = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        // Verificar se a data é válida
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0); // Zerar as horas, minutos, segundos e milissegundos para a comparação
+        const dataConsulta = new Date(data);
+        dataConsulta.setHours(0, 0, 0, 0);
+
+        if (dataConsulta < hoje) {
+            alert('A data da consulta só é válida se for para um dia futuro.');
+            return;
+        }
+
+        // Verificar se já existe uma consulta agendada no mesmo horário
+        const q = query(collection(db, "consultasAgendadas"), where("data", "==", data), where("hora", "==", hora));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            alert('Já existe uma consulta agendada para este horário.');
+            return;
+        }
+
         const consulta = {
           cpfConsulta,
           nome,
