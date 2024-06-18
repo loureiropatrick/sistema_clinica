@@ -55,6 +55,7 @@ const Home = () => {
     return (
         <div className="home">
             <Routes>
+                <Route path="home*" element={<Home />} />
                 <Route path="cadastro-pacientes" element={<CadastroPacientes />} />
                 <Route path="agendamento-consultas" element={<AgendamentoConsultas />} />
                 <Route path="calendario-consultas" element={<CalendarioConsultas />} />

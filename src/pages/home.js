@@ -6,6 +6,7 @@ const Home = () => {
   return (
     <div className="home-container">
       <h1 className="home-title">Bem-vindo ao Sistema de Clínica</h1>
+      <p>TESTE</p>
     </div>
   );
 };
