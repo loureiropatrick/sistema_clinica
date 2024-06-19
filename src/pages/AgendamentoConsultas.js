@@ -80,6 +80,7 @@ const AgendamentoConsultas = () => {
     const [hora, setHora] = useState('');
     const [motivo, setMotivo] = useState('');
     const [formaPagamento, setFormaPagamento] = useState('');
+    const [especialidade, setEspecialidade] = useState ('');
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -104,12 +105,13 @@ const AgendamentoConsultas = () => {
         }
 
         const consulta = {
-          cpfConsulta,
-          nome,
-          telefone,
+          cpfConsulta : userData.cpf,
+          nome: userData.nome,
+          telefone: userData.celular,
           data,
           hora,
           motivo,
+          especialidade,
           formaPagamento,
           confirmacao: false, // Campo "confirmação" adicionado com valor inicial "false"
           preço: null, // Campo "preço" adicionado com valor inicial "null"
@@ -125,6 +127,7 @@ const AgendamentoConsultas = () => {
             setData('');
             setHora('');
             setMotivo('');
+            setEspecialidade('');
             setFormaPagamento('');
         } catch (error) {
             console.error("Error adding document: ", error);
@@ -163,27 +166,27 @@ const AgendamentoConsultas = () => {
                             <div className="form-body">
                                 <div className="form-group">
                                     <label>Nome civil</label>
-                                    <Field type="text" name="nome" value={userData.nome || ''} readOnly />
+                                    <Field type="text" name="nome" value={userData.nome || ''} readOnly disabled/>
                                 </div>
                                 <div className="form-group">
                                     <label>Sexo</label>
-                                    <Field name="sexo" value={userData.sexo || ''} readOnly />
+                                    <Field name="sexo" value={userData.sexo || ''} readOnly disabled/>
                                 </div>
                                 <div className="form-group">
                                     <label>Nome social</label>
-                                    <Field type="text" name="nomeSocial" value={userData.nomeSocial || ''} readOnly />
+                                    <Field type="text" name="nomeSocial" value={userData.nomeSocial || ''} readOnly disabled/>
                                 </div>
                                 <div className="form-group">
                                     <label>Raça</label>
-                                    <Field name="raca" value={userData.raca || ''} readOnly />
+                                    <Field name="raca" value={userData.raca || ''} readOnly disabled/>
                                 </div>
                                 <div className="form-group">
                                     <label>CPF</label>
-                                    <Field name="cpf" value={userData.cpf || ''} readOnly />
+                                    <Field name="cpf" value={userData.cpf || ''} readOnly disabled/>
                                 </div>
                                 <div className="form-group">
                                     <label>Profissão</label>
-                                    <Field type="text" name="profissao" value={userData.profissao || ''} readOnly />
+                                    <Field type="text" name="profissao" value={userData.profissao || ''} readOnly disabled/>
                                 </div>
                             </div>
                         </div>
@@ -192,11 +195,11 @@ const AgendamentoConsultas = () => {
                             <div className="form-body">
                                 <div className="form-group">
                                     <label>Email</label>
-                                    <Field type="email" name="email" value={userData.email || ''} readOnly />
+                                    <Field type="email" name="email" value={userData.email || ''} readOnly disabled/>
                                 </div>
                                 <div className="form-group">
                                     <label>Celular</label>
-                                    <Field name="celular" value={userData.celular || ''} readOnly />
+                                    <Field name="celular" value={userData.celular || ''} readOnly disabled/>
                                 </div>
                             </div>
                         </div>
@@ -211,37 +214,6 @@ const AgendamentoConsultas = () => {
 
             <div className="formConsulta">
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label>CPF</label>
-                        <InputMask
-                            type="text"
-                            name="cpfConsulta"
-                            value={cpfConsulta}
-                            onChange={(e) => setCpfconsulta(userData.cpf)}
-                            mask="999.999.999-99"
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Nome</label>
-                        <input
-                            type="text"
-                            name="nome"
-                            value={nome}
-                            onChange={(e) => setNome(userData.nome)}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Telefone</label>
-                        <input
-                            type="text"
-                            name="Contato"
-                            value={telefone}
-                            onChange={(e) => setTelefone(userData.celular)}
-                            required
-                        />
-                    </div>
                     <div className="form-group">
                         <label>Data</label>
                         <input
@@ -272,6 +244,20 @@ const AgendamentoConsultas = () => {
                         ></textarea>
                     </div>
                     <div className="form-group">
+                        <label>Especialidade Desejada</label>
+                        <select
+                            name="especialidade"
+                            value={especialidade}
+                            onChange={(e) => setEspecialidade(e.target.value)}
+                            required
+                        >
+                        <option value = "">Selecione</option>
+                        <option value = "Clínico Geral">Clínico Geral</option>
+                        <option value = "Pediatra">Pediatra</option>
+                        <option value = "Medicina Geral">Cardiologia</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
                         <label>Forma de Pagamento</label>
                         <select
                             name="formaPagamento"
@@ -284,8 +270,6 @@ const AgendamentoConsultas = () => {
                             <option value="Cartão de Débito">Cartão de Débito</option>
                             <option value="PIX">PIX</option>
                             <option value="Dinheiro">Dinheiro</option>
-                            <option value="Plano de Saúde">Plano de Saúde</option>
-                            <option value="Convênio">Convênio</option>
                         </select>
                     </div>
 
