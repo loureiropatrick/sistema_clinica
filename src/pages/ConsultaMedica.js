@@ -1,4 +1,3 @@
-// src/pages/ConsultaMedica.js
 import React, { useState } from 'react';
 import { collection, addDoc } from "firebase/firestore";
 import InputMask from 'react-input-mask';
@@ -20,27 +19,13 @@ const ConsultaMedica = () => {
     cirurgias: '',
     fuma: '',
     bebe: '',
-    atividadeFisica: ''
+    atividadeFisica: '',
+    especialidadeMedica: ''  // novo campo para especialidade médica
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'nome') {
-      if (typeof value === 'string') {
-        setFormData({ ...formData, [name]: value });
-      }
-    } else if (name === 'cpf') {
-      if (/^\d{11}$/.test(value)) {
-        setFormData({ ...formData, [name]: value });
-      }
-    } else if (name === 'altura' || name === 'peso') {
-      const floatValue = parseFloat(value);
-      if (!isNaN(floatValue)) {
-        setFormData({ ...formData, [name]: floatValue });
-      }
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
@@ -51,6 +36,52 @@ const ConsultaMedica = () => {
     } catch (error) {
       console.error("Erro ao salvar consulta: ", error);
       alert("Erro ao salvar consulta");
+    }
+  };
+
+  const renderCamposEspecialidade = (especialidade) => {
+    switch (especialidade) {
+      case 'cardiologia':
+        return (
+          <>
+            <div className="form-group">
+              <label>Pressão Arterial</label>
+              <input type="text" name="pressaoArterial" onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Historial Cardíaco</label>
+              <textarea name="historialCardiaco" onChange={handleChange} required></textarea>
+            </div>
+          </>
+        );
+      case 'dermatologia':
+        return (
+          <>
+            <div className="form-group">
+              <label>Problemas de Pele</label>
+              <textarea name="problemasPele" onChange={handleChange} required></textarea>
+            </div>
+            <div className="form-group">
+              <label>Tratamentos Anteriores</label>
+              <textarea name="tratamentosAnteriores" onChange={handleChange} required></textarea>
+            </div>
+          </>
+        );
+      case 'ortopedia':
+        return (
+          <>
+            <div className="form-group">
+              <label>Lesões Ósseas</label>
+              <textarea name="lesoesOsseas" onChange={handleChange} required></textarea>
+            </div>
+            <div className="form-group">
+              <label>Cirurgias Ortopédicas</label>
+              <textarea name="cirurgiasOrtopedicas" onChange={handleChange} required></textarea>
+            </div>
+          </>
+        );
+      default:
+        return null;
     }
   };
 
@@ -66,7 +97,7 @@ const ConsultaMedica = () => {
             </div>
             <div className="form-group">
               <label>CPF</label>
-              <input type="text" name="cpf"  onChange={handleChange} required />
+              <input type="text" name="cpf" onChange={handleChange} required />
             </div>
           </div>
           <div className="form-row">
@@ -95,52 +126,24 @@ const ConsultaMedica = () => {
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Queixa</label>
-              <textarea name="queixa" placeholder="Pergunte quais sintomas o paciente está sentindo" onChange={handleChange} required></textarea>
-            </div>
-            <div className="form-group">
-              <label>Doenças</label>
-              <textarea name="doencas" placeholder="Verifique se o paciente têm alguma doença" onChange={handleChange} required></textarea>
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Histórico Familiar</label>
-              <textarea name="historicoFamiliar" placeholder="Pergunte se o paciente contém algum histórico familiar grave, como câncer, diabetes, etc" onChange={handleChange} required></textarea>
-            </div>
-            <div className="form-group">
-              <label>Medicamentos</label>
-              <textarea name="medicamentos" placeholder="Verifique se o paciente faz uso de algum medicamento contínuo" onChange={handleChange} required></textarea>
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Cirurgias</label>
-              <textarea name="cirurgias" placeholder="Pergunte se o paciente já fez alguma cirurgia" onChange={handleChange} required></textarea>
-            </div>
-            <div className="form-group">
-              <label>Fuma?</label>
-              <select name="fuma" onChange={handleChange} required>
-                <option value="">Fuma?</option>
-                <option value="sim">Sim</option>
-                <option value="nao">Não</option>
+              <label>Especialidade Médica</label>
+              <select name="especialidadeMedica" onChange={handleChange} required>
+                <option value="">Selecione a especialidade médica</option>
+                <option value="cardiologia">Cardiologia</option>
+                <option value="dermatologia">Dermatologia</option>
+                <option value="ortopedia">Ortopedia</option>
+                {/* Adicione outras especialidades conforme necessário */}
               </select>
             </div>
           </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Bebe?</label>
-              <select name="bebe" onChange={handleChange} required>
-                <option value="">Bebe?</option>
-                <option value="sim">Sim</option>
-                <option value="nao">Não</option>
-              </select>
+
+          {/* Renderização condicional dos campos baseados na especialidade selecionada */}
+          {formData.especialidadeMedica && (
+            <div className="form-row">
+              {renderCamposEspecialidade(formData.especialidadeMedica)}
             </div>
-            <div className="form-group">
-              <label>Atividade Física</label>
-              <textarea name="atividadeFisica" placeholder="Pergunte se o paciente pratica alguma atividade física "onChange={handleChange} required></textarea>
-            </div>
-          </div>
+          )}
+
         </div>
         <div className="btn-container">
           <button type="submit" className="btn">Salvar Consulta</button>
