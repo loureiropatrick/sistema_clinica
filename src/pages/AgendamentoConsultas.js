@@ -5,6 +5,7 @@ import { db } from '../firebaseConfig'; // Firebase Sync
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";  // Firebase CRUD
 import InputMask from 'react-input-mask';
 import firebase from '../firebaseConfig';
+import CadastroPacientes from './CadastroPacientes';
 
 const AgendamentoConsultas = () => {
 
@@ -14,6 +15,8 @@ const AgendamentoConsultas = () => {
     const [userData, setUserData] = useState(null); // Dados do usuário buscados no Firebase
     const [loading, setLoading] = useState(true); // Estado de carregamento
     const [error, setError] = useState(null); // Estado de erro
+    const [cpfNotFoundMessage, setCpfNotFoundMessage] = useState(''); // Mensagem de erro de CPF não encontrado
+    const [cpfFound, setCpfFound] = useState ('');
 
     const handleInputChange = (e) => {
         setCpf(e.target.value);
@@ -37,38 +40,41 @@ const AgendamentoConsultas = () => {
 
     // Função para buscar dados do usuário no Firebase
     useEffect(() => {
-      const fetchUserData = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const q = query(collection(db, "pacientes"), where("cpf", "==", cpf));
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-            setUserData(querySnapshot.docs[0].data());
-          } else {
-            setUserData(null);
-            setError("No user data found");
-          }
-        } catch (error) {
-          console.error("Error fetching document: ", error);
-          setError("Error fetching document");
-        } finally {
-          setLoading(false);
-        }
-      };
+        const fetchUserData = async () => {
+            setLoading(true);
+            setError(null);
+            setCpfNotFoundMessage(''); // Resetar mensagem de erro de CPF não encontrado
+            setCpfFound ('');
+            try {
+                const q = query(collection(db, "pacientes"), where("cpf", "==", cpf));
+                const querySnapshot = await getDocs(q);
+                if (!querySnapshot.empty) {
+                    setUserData(querySnapshot.docs[0].data());
+                    setCpfFound('CPF encontrado nos nossos registros.')
+                } else {
+                    setUserData(null);
+                {/* setCpfNotFoundMessage('CPF não encontrado.'); // Definir mensagem de erro de CPF não encontrado */}
+                }
+            } catch (error) {
+                console.error("Error fetching document: ", error);
+                setError("Error fetching document");
+            } finally {
+                setLoading(false);
+            }
+        };
 
-      if (cpf) {
-        fetchUserData();
-      }
+        if (cpf.length === 14) { // Verificar CPF completo (com máscara)
+            fetchUserData();
+        }
     }, [cpf]);
 
     const handleChange = (e) => {
         const value = e.target.value;
         setCpf(value);
         if (value.length === 14) { // 14 caracteres inclui os pontos e o hífen da máscara
-          setResult(validateCPF(value) ? 'CPF válido!' : 'CPF inválido!');
+            setResult(validateCPF(value) ? 'CPF válido!' : 'CPF inválido!');
         } else {
-          setResult('');
+            setResult('');
         }
     };
 
@@ -80,7 +86,7 @@ const AgendamentoConsultas = () => {
     const [hora, setHora] = useState('');
     const [motivo, setMotivo] = useState('');
     const [formaPagamento, setFormaPagamento] = useState('');
-    const [especialidade, setEspecialidade] = useState ('');
+    const [especialidade, setEspecialidade] = useState('');
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -105,16 +111,16 @@ const AgendamentoConsultas = () => {
         }
 
         const consulta = {
-          cpfConsulta : userData.cpf,
-          nome: userData.nome,
-          telefone: userData.celular,
-          data,
-          hora,
-          motivo,
-          especialidade,
-          formaPagamento,
-          confirmacao: false, // Campo "confirmação" adicionado com valor inicial "false"
-          preço: null, // Campo "preço" adicionado com valor inicial "null"
+            cpfConsulta: userData.cpf,
+            nome: userData.nome,
+            telefone: userData.celular,
+            data,
+            hora,
+            motivo,
+            especialidade,
+            formaPagamento,
+            confirmacao: false, // Campo "confirmação" adicionado com valor inicial "false"
+            preço: null, // Campo "preço" adicionado com valor inicial "null"
         };
 
         try {
@@ -144,7 +150,7 @@ const AgendamentoConsultas = () => {
             </div>
 
             <div className="idPaciente">
-                <form>
+                <form className="form-group" style={{ width: "100%", alignItems: "center" }}>
                     <InputMask
                         name="cpf"
                         placeholder="CPF do Cliente"
@@ -155,6 +161,12 @@ const AgendamentoConsultas = () => {
                         required
                     />
                 </form>
+                {cpfNotFoundMessage && (
+                    <p className="error-message">{cpfNotFoundMessage}</p>
+                )}
+                {cpfFound && (
+                    <p style = {{color: "green", fontWeight: "bold"}}>{cpfFound}</p>
+                )}
                 {/*<p className={result === 'CPF válido!' ? 'valid' : 'invalid'}>{result}</p> -- Desativado para não confundir o cliente */}
             </div>
 
@@ -166,27 +178,27 @@ const AgendamentoConsultas = () => {
                             <div className="form-body">
                                 <div className="form-group">
                                     <label>Nome civil</label>
-                                    <Field type="text" name="nome" value={userData.nome || ''} readOnly disabled/>
+                                    <Field type="text" name="nome" value={userData.nome || ''} readOnly disabled />
                                 </div>
                                 <div className="form-group">
                                     <label>Sexo</label>
-                                    <Field name="sexo" value={userData.sexo || ''} readOnly disabled/>
+                                    <Field name="sexo" value={userData.sexo || ''} readOnly disabled />
                                 </div>
                                 <div className="form-group">
                                     <label>Nome social</label>
-                                    <Field type="text" name="nomeSocial" value={userData.nomeSocial || ''} readOnly disabled/>
+                                    <Field type="text" name="nomeSocial" value={userData.nomeSocial || ''} readOnly disabled />
                                 </div>
                                 <div className="form-group">
                                     <label>Raça</label>
-                                    <Field name="raca" value={userData.raca || ''} readOnly disabled/>
+                                    <Field name="raca" value={userData.raca || ''} readOnly disabled />
                                 </div>
                                 <div className="form-group">
                                     <label>CPF</label>
-                                    <Field name="cpf" value={userData.cpf || ''} readOnly disabled/>
+                                    <Field name="cpf" value={userData.cpf || ''} readOnly disabled />
                                 </div>
                                 <div className="form-group">
                                     <label>Profissão</label>
-                                    <Field type="text" name="profissao" value={userData.profissao || ''} readOnly disabled/>
+                                    <Field type="text" name="profissao" value={userData.profissao || ''} readOnly disabled />
                                 </div>
                             </div>
                         </div>
@@ -195,11 +207,11 @@ const AgendamentoConsultas = () => {
                             <div className="form-body">
                                 <div className="form-group">
                                     <label>Email</label>
-                                    <Field type="email" name="email" value={userData.email || ''} readOnly disabled/>
+                                    <Field type="email" name="email" value={userData.email || ''} readOnly disabled />
                                 </div>
                                 <div className="form-group">
                                     <label>Celular</label>
-                                    <Field name="celular" value={userData.celular || ''} readOnly disabled/>
+                                    <Field name="celular" value={userData.celular || ''} readOnly disabled />
                                 </div>
                             </div>
                         </div>
@@ -251,10 +263,10 @@ const AgendamentoConsultas = () => {
                             onChange={(e) => setEspecialidade(e.target.value)}
                             required
                         >
-                        <option value = "">Selecione</option>
-                        <option value = "Clínico Geral">Clínico Geral</option>
-                        <option value = "Pediatra">Pediatra</option>
-                        <option value = "Medicina Geral">Cardiologia</option>
+                            <option value="">Selecione</option>
+                            <option value="Clínico Geral">Clínico Geral</option>
+                            <option value="Pediatra">Pediatra</option>
+                            <option value="Cardiologia">Cardiologia</option>
                         </select>
                     </div>
                     <div className="form-group">
@@ -273,7 +285,7 @@ const AgendamentoConsultas = () => {
                         </select>
                     </div>
 
-                    <button type="submit" style = {{ marginTop: '50px', width: '50vw', textAlign: 'center'}}>Confirmar</button>
+                    <button type="submit" style={{ marginTop: '50px', width: '100%', textAlign: 'center' }}>Confirmar</button>
 
                 </form>
 
