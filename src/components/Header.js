@@ -1,20 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaBars } from 'react-icons/fa';
 import './Header.css';
 import userPlaceholder from '../assets/user-placeholder.png';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ toggleSidebar }) => {
+    const [user, setUser] = useState(null);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const loggedUser = JSON.parse(localStorage.getItem('user'));
+        setUser(loggedUser);
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('user');
+        navigate('');
+    };
+
+    const handleNavigate = (path) => {
+        navigate(path);
+        setDropdownVisible(false); // Fechar o dropdown ao navegar
+    };
+
+    const toggleDropdown = () => {
+        setDropdownVisible(!dropdownVisible);
+    };
+
     return (
         <header className="header">
             <FaBars className="menu-icon" onClick={toggleSidebar} />
             <div className="user-info">
-                <img src={userPlaceholder} alt="Usuário" />
-                <span>Dr. Nome do Médico</span>
+                <img src={user ? user.profilePic : userPlaceholder} alt="Usuário" />
+                <div className="user-dropdown">
+                    <span onClick={toggleDropdown} className="user-name">{user ? user.nome : 'Usuário'}</span>
+                    {dropdownVisible && (
+                        <div className="dropdown-content">
+                            <button onClick={() => handleNavigate('/dados-pessoais')}>Dados pessoais</button>
+                            <button onClick={() => handleNavigate('/alterar-senha')}>Alterar senha</button>
+                            <button onClick={handleLogout}>Sair</button>
+                        </div>
+                    )}
+                </div>
             </div>
         </header>
     );
 };
 
 export default Header;
+
+
+
 
 
