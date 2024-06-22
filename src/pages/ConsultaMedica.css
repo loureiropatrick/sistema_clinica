@@ -68,3 +68,9 @@
 .btn:hover {
   background: #147a66;
 }
+
+.error{
+  color: red;
+  font-weight: bold;  
+
+}
