@@ -15,8 +15,13 @@ const Header = ({ toggleSidebar }) => {
     }, []);
 
     const handleLogout = () => {
+        console.log("Logout iniciado");
         localStorage.removeItem('user');
-        navigate('');
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('tipoFuncionario');
+        setUser(null); // Limpar o estado do usuário localmente
+        navigate('/'); // Redirecionar para a página inicial
+        console.log("Usuário redirecionado para /");
     };
 
     const handleNavigate = (path) => {
@@ -49,8 +54,6 @@ const Header = ({ toggleSidebar }) => {
 };
 
 export default Header;
-
-
 
 
 

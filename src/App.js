@@ -1,11 +1,9 @@
-// src/App.js
-
 import React, { useState, useEffect } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import Login from './components/Login';
-import SignUp from './components/signUp';
+import SignUp from './components/SignUp';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import CadastroPacientes from './pages/CadastroPacientes';
@@ -18,6 +16,7 @@ import ReceitaServicos from './pages/ReceitaServicos';
 import ResetPassword from './components/ResetPassword';
 import DadosPessoais from './components/DadosPessoais';
 import AlterarSenha from './components/AlterarSenha';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 const App = () => {
@@ -25,6 +24,19 @@ const App = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [tipoFuncionario, setTipoFuncionario] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const savedIsAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+        const savedTipoFuncionario = localStorage.getItem('tipoFuncionario');
+
+        if (savedIsAuthenticated && savedTipoFuncionario) {
+            setIsAuthenticated(true);
+            setTipoFuncionario(savedTipoFuncionario);
+            setLoading(false);
+        } else {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         const auth = getAuth();
@@ -41,19 +53,27 @@ const App = () => {
                         console.log("Tipo de funcionário obtido do Firebase: ", tipo);
                         setTipoFuncionario(tipo);
                         setIsAuthenticated(true);
+                        localStorage.setItem('isAuthenticated', 'true');
+                        localStorage.setItem('tipoFuncionario', tipo);
                     } else {
                         console.log("Documento não encontrado!");
                         setTipoFuncionario(null);
                         setIsAuthenticated(false);
+                        localStorage.removeItem('isAuthenticated');
+                        localStorage.removeItem('tipoFuncionario');
                     }
                 } catch (error) {
                     console.error("Erro ao buscar documento: ", error);
                     setTipoFuncionario(null);
                     setIsAuthenticated(false);
+                    localStorage.removeItem('isAuthenticated');
+                    localStorage.removeItem('tipoFuncionario');
                 }
             } else {
                 setIsAuthenticated(false);
                 setTipoFuncionario(null);
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('tipoFuncionario');
             }
             setLoading(false);
         });
@@ -68,6 +88,8 @@ const App = () => {
     const handleLogin = (user) => {
         setIsAuthenticated(true);
         setTipoFuncionario(user.tipoFuncionario);
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('tipoFuncionario', user.tipoFuncionario);
     };
 
     const renderRoutes = () => {
@@ -75,55 +97,46 @@ const App = () => {
             return <div>Carregando...</div>;
         }
 
-        if (!isAuthenticated) {
-            return (
-                <Routes>
-                    <Route path="/" element={<Login onLogin={handleLogin} />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                </Routes>
-            );
-        }
-
-        if (!tipoFuncionario) {
-            return <div>Tipo de funcionário não reconhecido.</div>;
-        }
-
-        switch (tipoFuncionario) {
-            case 'admin':
-                return (
-                    <Routes>
-                        <Route path="/" element={<CadastroPacientes />} />
+        return (
+            <Routes>
+                {!isAuthenticated ? (
+                    <>
+                        <Route path="/" element={<Login onLogin={handleLogin} />} />
                         <Route path="/signup" element={<SignUp />} />
-                        <Route path="/home/*" element={<Home tipoFuncionario={tipoFuncionario} />} />
-                        <Route path="/dados-pessoais" element={<DadosPessoais />} />
-                        <Route path="/alterar-senha" element={<AlterarSenha />} />
-                    </Routes>
-                );
-            case 'atendente':
-                return (
-                    <Routes>
-                        <Route path="/" element={<CadastroPacientes />} />
-                        <Route path="/home/*" element={<Home tipoFuncionario={tipoFuncionario} />} />
-                        <Route path="/dados-pessoais" element={<DadosPessoais />} />
-                        <Route path="/alterar-senha" element={<AlterarSenha />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
                         <Route path="*" element={<Navigate to="/" />} />
-                    </Routes>
-                );
-            case 'medico':
-                return (
-                    <Routes>
-                        <Route path="/" element={<CalendarioConsultas />} />
-                        <Route path="/home/*" element={<Home tipoFuncionario={tipoFuncionario} />} />
-                        <Route path="/dados-pessoais" element={<DadosPessoais />} />
-                        <Route path="/alterar-senha" element={<AlterarSenha />} />
-                        <Route path="*" element={<Navigate to="/" />} />
-                    </Routes>
-                );
-            default:
-                console.log("Tipo de funcionário não reconhecido: ", tipoFuncionario);
-                return <div>Tipo de funcionário não reconhecido.</div>;
-        }
+                    </>
+                ) : (
+                    <>
+                        <Route
+                            path="/home/*"
+                            element={
+                                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                    <HomePage tipoFuncionario={tipoFuncionario} />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/dados-pessoais"
+                            element={
+                                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                    <DadosPessoais />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/alterar-senha"
+                            element={
+                                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                                    <AlterarSenha />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route path="*" element={<Navigate to="/home" />} />
+                    </>
+                )}
+            </Routes>
+        );
     };
 
     return (
@@ -143,12 +156,13 @@ const App = () => {
     );
 };
 
-const Home = ({ tipoFuncionario }) => {
+// Renomeando o componente Home para HomePage
+const HomePage = ({ tipoFuncionario }) => {
     const renderRoutes = () => {
         switch (tipoFuncionario) {
             case 'admin':
                 return (
-                    <>
+                    <Routes>
                         <Route path="cadastro-pacientes" element={<CadastroPacientes />} />
                         <Route path="agendamento-consultas" element={<AgendamentoConsultas />} />
                         <Route path="calendario-consultas" element={<CalendarioConsultas />} />
@@ -156,23 +170,23 @@ const Home = ({ tipoFuncionario }) => {
                         <Route path="historico-paciente" element={<HistoricoPaciente />} />
                         <Route path="cadastro-usuarios" element={<CadastroUsuarios />} />
                         <Route path="receita-servicos" element={<ReceitaServicos />} />
-                    </>
+                    </Routes>
                 );
             case 'atendente':
                 return (
-                    <>
+                    <Routes>
                         <Route path="cadastro-pacientes" element={<CadastroPacientes />} />
                         <Route path="agendamento-consultas" element={<AgendamentoConsultas />} />
                         <Route path="calendario-consultas" element={<CalendarioConsultas />} />
-                    </>
+                    </Routes>
                 );
             case 'medico':
                 return (
-                    <>
+                    <Routes>
                         <Route path="calendario-consultas" element={<CalendarioConsultas />} />
                         <Route path="consulta-medica" element={<ConsultaMedica />} />
                         <Route path="historico-paciente" element={<HistoricoPaciente />} />
-                    </>
+                    </Routes>
                 );
             default:
                 console.log("Tipo de funcionário não reconhecido no Home: ", tipoFuncionario);
@@ -182,9 +196,7 @@ const Home = ({ tipoFuncionario }) => {
 
     return (
         <div className="home">
-            <Routes>
-                {renderRoutes()}
-            </Routes>
+            {renderRoutes()}
         </div>
     );
 };
