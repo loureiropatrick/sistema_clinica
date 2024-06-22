@@ -1,5 +1,6 @@
+// src/pages/ConsultaMedica.js
 import React, { useState } from 'react';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import InputMask from 'react-input-mask';
 import { db } from '../firebaseConfig';
 import './ConsultaMedica.css';
@@ -20,133 +21,208 @@ const ConsultaMedica = () => {
     fuma: '',
     bebe: '',
     atividadeFisica: '',
-    especialidadeMedica: ''  // novo campo para especialidade médica
+    conclusao: '',
+    receituario: '',
+    crmMedico: '',
+    especialidadeMedico: '',
   });
 
-  const handleChange = (e) => {
+  const [errors, setErrors] = useState({});
+
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    if (name === 'cpf' && value.length === 14) { // CPF length with mask
+      try {
+        const pacientesQuery = query(collection(db, "pacientes"), where("cpf", "==", value));
+        const querySnapshot = await getDocs(pacientesQuery);
+
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach((doc) => {
+            const patientData = doc.data();
+            setFormData({
+              ...formData,
+              nome: patientData.nome,
+              dataNascimento: patientData.dataNascimento,
+              sexo: patientData.sexo,
+              cpf: value // Keep the CPF value as it is
+            });
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao buscar paciente: ", error);
+      }
+    }
+  };
+
+  const validate = () => {
+    let tempErrors = {};
+    let isValid = true;
+
+    Object.keys(formData).forEach(key => {
+      if (!formData[key]) {
+        tempErrors[key] = 'Este campo é obrigatório';
+        isValid = false;
+      }
+    });
+
+    setErrors(tempErrors);
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await addDoc(collection(db, "consultasMedicas"), formData);
-      alert("Consulta salva com sucesso!");
-    } catch (error) {
-      console.error("Erro ao salvar consulta: ", error);
-      alert("Erro ao salvar consulta");
-    }
-  };
 
-  const renderCamposEspecialidade = (especialidade) => {
-    switch (especialidade) {
-      case 'cardiologia':
-        return (
-          <>
-            <div className="form-group">
-              <label>Pressão Arterial</label>
-              <input type="text" name="pressaoArterial" onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label>Historial Cardíaco</label>
-              <textarea name="historialCardiaco" onChange={handleChange} required></textarea>
-            </div>
-          </>
-        );
-      case 'dermatologia':
-        return (
-          <>
-            <div className="form-group">
-              <label>Problemas de Pele</label>
-              <textarea name="problemasPele" onChange={handleChange} required></textarea>
-            </div>
-            <div className="form-group">
-              <label>Tratamentos Anteriores</label>
-              <textarea name="tratamentosAnteriores" onChange={handleChange} required></textarea>
-            </div>
-          </>
-        );
-      case 'ortopedia':
-        return (
-          <>
-            <div className="form-group">
-              <label>Lesões Ósseas</label>
-              <textarea name="lesoesOsseas" onChange={handleChange} required></textarea>
-            </div>
-            <div className="form-group">
-              <label>Cirurgias Ortopédicas</label>
-              <textarea name="cirurgiasOrtopedicas" onChange={handleChange} required></textarea>
-            </div>
-          </>
-        );
-      default:
-        return null;
+    if (validate()) {
+      try {
+        await addDoc(collection(db, "consultasMedicas"), formData);
+        alert('Consulta enviada com sucesso!');
+        setFormData({
+          nome: '',
+          cpf: '',
+          dataNascimento: '',
+          altura: '',
+          peso: '',
+          sexo: '',
+          queixa: '',
+          doencas: '',
+          historicoFamiliar: '',
+          medicamentos: '',
+          cirurgias: '',
+          fuma: '',
+          bebe: '',
+          atividadeFisica: '',
+          conclusao: '',
+          receituario: '',
+          crmMedico: '',
+          especialidadeMedico: '',
+        });
+      } catch (error) {
+        console.error('Erro ao enviar consulta: ', error);
+        alert('Erro ao enviar consulta');
+      }
     }
   };
 
   return (
     <div className="container">
-      <form className="consulta-medica-form" onSubmit={handleSubmit}>
-        <h2 className="form-header">Consulta Médica</h2>
-        <div className="form-body">
-          <div className="form-row">
-            <div className="form-group">
-              <label>Nome</label>
-              <input type="text" name="nome" placeholder="Preencha o nome do paciente" onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label>CPF</label>
-              <input type="text" name="cpf" onChange={handleChange} required />
-            </div>
+      <h2 className="form-header">Consulta Médica</h2>
+      <h3 className="form-header">Informações básicas do paciente</h3>
+      <form onSubmit={handleSubmit} className="form-body">
+        <div className="form-row">
+          <div className="form-group">
+            <label>Nome:</label>
+            <input type="text" name="nome" value={formData.nome} onChange={handleChange}disabled/>
+            {errors.nome && <span className="error">{errors.nome}</span>}
           </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Data de Nascimento</label>
-              <input type="date" name="dataNascimento" onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label>Altura</label>
-              <input type="text" name="altura" onChange={handleChange} required />
-            </div>
+          <div className="form-group">
+            <label>CPF:</label>
+            <InputMask mask="999.999.999-99" type="text" name="cpf" value={formData.cpf} onChange={handleChange} />
+            {errors.cpf && <span className="error">{errors.cpf}</span>}
           </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Peso</label>
-              <input type="text" name="peso" onChange={handleChange} required />
-            </div>
-            <div className="form-group">
-              <label>Sexo</label>
-              <select name="sexo" onChange={handleChange} required>
-                <option value="">Sexo</option>
-                <option value="masculino">Masculino</option>
-                <option value="feminino">Feminino</option>
-              </select>
-            </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Data de Nascimento:</label>
+            <InputMask mask="dd/mm/yyyy" type="text" name="dataNascimento" value={formData.dataNascimento} onChange={handleChange} disabled/>
+            {errors.dataNascimento && <span className="error">{errors.dataNascimento}</span>}
           </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Especialidade Médica</label>
-              <select name="especialidadeMedica" onChange={handleChange} required>
-                <option value="">Selecione a especialidade médica</option>
-                <option value="cardiologia">Cardiologia</option>
-                <option value="dermatologia">Dermatologia</option>
-                <option value="ortopedia">Ortopedia</option>
-                {/* Adicione outras especialidades conforme necessário */}
-              </select>
-            </div>
+          <div className="form-group">
+            <label>Altura:</label>
+            <input type="text" name="altura" value={formData.altura} onChange={handleChange} />
+            {errors.altura && <span className="error">{errors.altura}</span>}
           </div>
-
-          {/* Renderização condicional dos campos baseados na especialidade selecionada */}
-          {formData.especialidadeMedica && (
-            <div className="form-row">
-              {renderCamposEspecialidade(formData.especialidadeMedica)}
-            </div>
-          )}
-
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Peso:</label>
+            <input type="text" name="peso" value={formData.peso} onChange={handleChange}/>
+            {errors.peso && <span className="error">{errors.peso}</span>}
+          </div>
+          <div className="form-group">
+            <label>Sexo:</label>
+            <input name="sexo" value={formData.sexo.toUpperCase()} onChange={handleChange} disabled/>
+            {errors.sexo && <span className="error">{errors.sexo}</span>}
+          </div>
+        </div>
+        <h3 className="form-header">Informações do Médico</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>CRM Médico:</label>
+            <input type="text" name="crmMedico" value={formData.crmMedico} onChange={handleChange} />
+            {errors.crmMedico && <span className="error">{errors.crmMedico}</span>}
+          </div>
+          <div className="form-group">
+            <label>Especialidade Médico:</label>
+            <input type="text" name="especialidadeMedico" value={formData.especialidadeMedico} onChange={handleChange} />
+            {errors.especialidadeMedico && <span className="error">{errors.especialidadeMedico}</span>}
+          </div>
+        </div>
+        <h3 className="form-header">Anamnese</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Queixa:</label>
+            <input type="text" name="queixa" value={formData.queixa} onChange={handleChange} />
+            {errors.queixa && <span className="error">{errors.queixa}</span>}
+          </div>
+          <div className="form-group">
+            <label>Doenças:</label>
+            <input type="text" name="doencas" value={formData.doencas} onChange={handleChange} />
+            {errors.doencas && <span className="error">{errors.doencas}</span>}
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Histórico Familiar:</label>
+            <input type="text" name="historicoFamiliar" value={formData.historicoFamiliar} onChange={handleChange} />
+            {errors.historicoFamiliar && <span className="error">{errors.historicoFamiliar}</span>}
+          </div>
+          <div className="form-group">
+            <label>Medicamentos:</label>
+            <input type="text" name="medicamentos" value={formData.medicamentos} onChange={handleChange} />
+            {errors.medicamentos && <span className="error">{errors.medicamentos}</span>}
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Cirurgias:</label>
+            <input type="text" name="cirurgias" value={formData.cirurgias} onChange={handleChange} />
+            {errors.cirurgias && <span className="error">{errors.cirurgias}</span>}
+          </div>
+          <div className="form-group">
+            <label>Fuma:</label>
+            <input type="text" name="fuma" value={formData.fuma} onChange={handleChange} />
+            {errors.fuma && <span className="error">{errors.fuma}</span>}
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Bebe:</label>
+            <input type="text" name="bebe" value={formData.bebe} onChange={handleChange} />
+            {errors.bebe && <span className="error">{errors.bebe}</span>}
+          </div>
+          <div className="form-group">
+            <label>Atividade Física:</label>
+            <input type="text" name="atividadeFisica" value={formData.atividadeFisica} onChange={handleChange} />
+            {errors.atividadeFisica && <span className="error">{errors.atividadeFisica}</span>}
+          </div>
+        </div>
+        <h3 className="form-header">Conclusão Médica</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Conclusão:</label>
+            <input type="text" name="conclusao" value={formData.conclusao} onChange={handleChange} />
+            {errors.conclusao && <span className="error">{errors.conclusao}</span>}
+          </div>
+          <div className="form-group">
+            <label>Receituário:</label>
+            <input type="text" name="receituario" value={formData.receituario} onChange={handleChange} />
+            {errors.receituario && <span className="error">{errors.receituario}</span>}
+          </div>
         </div>
         <div className="btn-container">
-          <button type="submit" className="btn">Salvar Consulta</button>
+          <button type="submit" className="btn" style = {{width: "100%", height: "100%"}}>Enviar Consulta</button>
         </div>
       </form>
     </div>

@@ -49,7 +49,7 @@ const HistoricoPaciente = () => {
             />
           </div>
           <div className="btn-container">
-            <button type="submit" className="btn">Buscar Histórico</button>
+            <button type="submit" className="btn" style = {{width: "100%", height: "100%"}}>Buscar Histórico</button>
           </div>
         </div>
       </form>
@@ -87,5 +87,3 @@ const HistoricoPaciente = () => {
 };
 
 export default HistoricoPaciente;
-
-
