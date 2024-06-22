@@ -4,16 +4,18 @@ import { collection, getDocs, deleteDoc, doc, updateDoc, query, where } from "fi
 import './CalendarioConsultas.css'; // Importe o arquivo CSS
 
 const CalendarioConsultas = () => {
-    const [data, setData] = useState('');
+    const [dataInicio, setDataInicio] = useState('');
+    const [dataFim, setDataFim] = useState('');
     const [consultas, setConsultas] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 5;
     const [modalAberto, setModalAberto] = useState(false); // Estado para controlar se o modal de edição está aberto
     const [consultaSelecionada, setConsultaSelecionada] = useState(null); // Estado para armazenar os dados da consulta selecionada para edição
     const [formEdicao, setFormEdicao] = useState({
         data: '',
         hora: '',
         motivo: '',
+        especialidade: '',
         formaPagamento: ''
     });
     const [mensagemSucesso, setMensagemSucesso] = useState('');
@@ -24,9 +26,12 @@ const CalendarioConsultas = () => {
             const consultasCollection = collection(db, "consultasAgendadas");
             let consultasQuery = consultasCollection;
 
-            // Se houver uma data selecionada, aplica o filtro
-            if (data) {
-                consultasQuery = query(consultasCollection, where("data", "==", data));
+            // Se houver uma faixa de data selecionada, aplica o filtro
+            if (dataInicio && dataFim) {
+                consultasQuery = query(consultasCollection,
+                    where("data", ">=", dataInicio),
+                    where("data", "<=", dataFim)
+                );
             }
 
             const querySnapshot = await getDocs(consultasQuery);
@@ -43,6 +48,8 @@ const CalendarioConsultas = () => {
             });
 
             setConsultas(consultasList);
+            setCurrentPage(1);
+
         } catch (error) {
             console.error("Erro ao buscar consultas:", error);
         }
@@ -50,7 +57,7 @@ const CalendarioConsultas = () => {
 
     useEffect(() => {
         fetchConsultas();
-    }, [data]);
+    }, [dataInicio, dataFim]);
 
     const formatarData = (data) => {
         const [ano, mes, dia] = data.split('-');
@@ -94,6 +101,7 @@ const CalendarioConsultas = () => {
             data: consulta.data,
             hora: consulta.hora,
             motivo: consulta.motivo,
+            especialidade: consulta.especialidade,
             formaPagamento: consulta.formaPagamento
         });
         setModalAberto(true);
@@ -118,6 +126,7 @@ const CalendarioConsultas = () => {
                     data: formEdicao.data,
                     hora: formEdicao.hora,
                     motivo: formEdicao.motivo,
+                    especialidade: formEdicao.especialidade,
                     formaPagamento: formEdicao.formaPagamento
                 });
                 fetchConsultas();
@@ -127,6 +136,7 @@ const CalendarioConsultas = () => {
                     data: '',
                     hora: '',
                     motivo: '',
+                    especialidade: '',
                     formaPagamento: ''
                 });
                 setMensagemSucesso('Alteração concluída com sucesso!');
@@ -148,6 +158,7 @@ const CalendarioConsultas = () => {
             data: '',
             hora: '',
             motivo: '',
+            especialidade: '',
             formaPagamento: ''
         });
     };
@@ -173,23 +184,29 @@ const CalendarioConsultas = () => {
         <div className="main">
             <div className="title">
                 <h1>Calendário de Consultas</h1>
-                <h2>Etapa 1</h2>
-                <p>Escolha a data que você deseja verificar quais consultas estão marcadas.</p>
-                <div className="form-group">
-                    <label></label>
-                    <input
+                <h2>Escolha a faixa de tempo que você deseja verificar quais consultas estão marcadas.</h2>
+                <div className = "form-group" style = {{width: "100%", alignItems: "center"}}>
+                    <label>Data Início:</label>
+                    <input style = {{width: "300px"}}
                         type="date"
-                        name="data"
-                        value={data}
-                        onChange={(e) => setData(e.target.value)}
+                        name="dataInicio"
+                        value={dataInicio}
+                        onChange={(e) => setDataInicio(e.target.value)}
+                        required
+                    />
+                    <label>Data Fim:</label>
+                    <input style = {{width: "300px"}}
+                        type="date"
+                        name="dataFim"
+                        value={dataFim}
+                        onChange={(e) => setDataFim(e.target.value)}
                         required
                     />
                 </div>
             </div>
 
             <div className="title" style={{ marginTop: '50px' }}>
-                <h2>Etapa 2</h2>
-                <p>Consulte e interaja com as consultas do dia, da maneira como preferir.</p>
+                <h2>Consulte e interaja com as consultas do dia, da maneira como preferir.</h2>
                 <table className="tabela1">
                     <thead>
                         <tr>
@@ -199,6 +216,7 @@ const CalendarioConsultas = () => {
                             <th>CPF</th>
                             <th>Telefone</th>
                             <th>Motivo</th>
+                            <th>Especialidade</th>
                             <th>Forma de Pagamento</th>
                             <th>Confirmar</th>
                             <th>Alterar</th>
@@ -215,6 +233,7 @@ const CalendarioConsultas = () => {
                                     <td>{consulta.cpfConsulta}</td>
                                     <td>{consulta.telefone}</td>
                                     <td>{consulta.motivo}</td>
+                                    <td>{consulta.especialidade}</td>
                                     <td>{consulta.formaPagamento}</td>
                                     <td>
                                         <select
@@ -236,7 +255,7 @@ const CalendarioConsultas = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="10">Nenhuma consulta encontrada para esta data.</td>
+                                <td colSpan="10">Nenhuma consulta encontrada para esta faixa de tempo.</td>
                             </tr>
                         )}
                     </tbody>
@@ -278,6 +297,20 @@ const CalendarioConsultas = () => {
                             />
                         </div>
                         <div>
+                            <label>Especialidade:</label>
+                            <select
+                                name="especialidade"
+                                value={formEdicao.especialidade}
+                                onChange = {(e) => setFormEdicao({... formEdicao, especialidade: e.target.value})}
+                            
+                            >
+                                <option value="Clínico Geral">Clínico Geral</option>
+                                <option value="Pediatria">Pediatria</option>
+                                <option value="Cardiologia">Cardiologia</option>
+
+                            </select>
+                        </div>
+                        <div>
                             <label>Forma de Pagamento:</label>
                             <select
                                 name="formaPagamento"
@@ -288,8 +321,6 @@ const CalendarioConsultas = () => {
                                 <option value="Cartão de Débito">Cartão de Débito</option>
                                 <option value="PIX">PIX</option>
                                 <option value="Dinheiro">Dinheiro</option>
-                                <option value="Plano de Saúde">Plano de Saúde</option>
-                                <option value="Convênio">Convênio</option>
                             </select>
                         </div>
                         <div className="modal-buttons">
