@@ -9,7 +9,7 @@ const ConsultaMedica = () => {
   const [formData, setFormData] = useState({
     nome: '',
     cpf: '',
-    dataNascimento: '',
+    idade: '',
     altura: '',
     peso: '',
     sexo: '',
@@ -25,6 +25,7 @@ const ConsultaMedica = () => {
     receituario: '',
     crmMedico: '',
     especialidade: '',
+    observacoes: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -44,7 +45,7 @@ const ConsultaMedica = () => {
             setFormData({
               ...formData,
               nome: patientData.nome,
-              dataNascimento: patientData.dataNascimento,
+              idade: patientData.idade,
               sexo: patientData.sexo,
               cpf: value // Keep the CPF value as it is
             });
@@ -81,7 +82,7 @@ const ConsultaMedica = () => {
         setFormData({
           nome: '',
           cpf: '',
-          dataNascimento: '',
+          idade: '',
           altura: '',
           peso: '',
           sexo: '',
@@ -97,6 +98,7 @@ const ConsultaMedica = () => {
           receituario: '',
           crmMedico: '',
           especialidade: '',
+          observacoes: '',
         });
       } catch (error) {
         console.error('Erro ao enviar consulta: ', error);
@@ -109,25 +111,24 @@ const ConsultaMedica = () => {
     <div className="container">
       <h2 className="form-header">Consulta Médica</h2>
       <h3 className="form-header">Informações básicas do paciente</h3>
-      <p className="form-header">(Comece com a inserção do CPF)</p>
       <form onSubmit={handleSubmit} className="form-body">
         <div className="form-row">
-          <div className="form-group">
-            <label>Nome:</label>
-            <input type="text" name="nome" value={formData.nome} onChange={handleChange} readOnly/>
-            {errors.nome && <span className="error">{errors.nome}</span>}
-          </div>
           <div className="form-group">
             <label>CPF:</label>
             <InputMask mask="999.999.999-99" type="text" name="cpf" value={formData.cpf} onChange={handleChange} />
             {errors.cpf && <span className="error">{errors.cpf}</span>}
           </div>
+          <div className="form-group">
+            <label>Nome:</label>
+            <input type="text" name="nome" value={formData.nome} onChange={handleChange} readOnly/>
+            {errors.nome && <span className="error">{errors.nome}</span>}
+          </div>
         </div>
         <div className="form-row">
           <div className="form-group">
-            <label>Data de Nascimento:</label>
-            <InputMask mask="dd/mm/yyyy" type="text" name="dataNascimento" value={formData.dataNascimento} onChange={handleChange} readOnly/>
-            {errors.dataNascimento && <span className="error">{errors.dataNascimento}</span>}
+            <label>Idade</label>
+            <input type="text" name="idade" value={formData.idade} onChange={handleChange} readOnly/>
+            {errors.idade && <span className="error">{errors.idade}</span>}
           </div>
           <div className="form-group">
             <label>Altura:</label>
@@ -220,7 +221,56 @@ const ConsultaMedica = () => {
             {errors.atividadeFisica && <span className="error">{errors.atividadeFisica}</span>}
           </div>
         </div>
+
+
+        <h3 className="form-header">Perguntas Específicas</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label>XXXXXXXXXXXX</label>
+            <input type="text" name="queixa" value={formData.queixa} onChange={handleChange} />
+            {errors.queixa && <span className="error">{errors.queixa}</span>}
+          </div>
+          <div className="form-group">
+            <label>XXXXXXXXXXXX</label>
+            <input type="text" name="doencas" value={formData.doencas} onChange={handleChange} />
+            {errors.doencas && <span className="error">{errors.doencas}</span>}
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>XXXXXXXXXXXX</label>
+            <input type="text" name="historicoFamiliar" value={formData.historicoFamiliar} onChange={handleChange} />
+            {errors.historicoFamiliar && <span className="error">{errors.historicoFamiliar}</span>}
+          </div>
+          <div className="form-group">
+            <label>XXXXXXXXXXXX</label>
+            <input type="text" name="medicamentos" value={formData.medicamentos} onChange={handleChange} />
+            {errors.medicamentos && <span className="error">{errors.medicamentos}</span>}
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label>XXXXXXXXXXXX</label>
+            <input type="text" name="cirurgias" value={formData.cirurgias} onChange={handleChange} />
+            {errors.cirurgias && <span className="error">{errors.cirurgias}</span>}
+          </div>
+          <div className="form-group">
+            <label>XXXXXXXXXXXX</label>
+            <input type="text" name="fuma" value={formData.fuma} onChange={handleChange} />
+            {errors.fuma && <span className="error">{errors.fuma}</span>}
+          </div>
+        </div>
+
+
         <h3 className="form-header">Conclusão Médica</h3>
+        <div className="form-row">
+          <div className="form-group">
+            <label style = {{textAlign: "center"}}>Observações Adicionais</label>
+            <input style = {{width: "100%", height: "100px"}} type="text" name="observacoes" value={formData.observacoes} onChange={handleChange}/>
+            {errors.observacoes && <span className="error">{errors.observacoes}</span>}
+          </div>
+        </div>
+
         <div className="form-row">
           <div className="form-group">
             <label>Conclusão:</label>
